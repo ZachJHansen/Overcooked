@@ -1,0 +1,15 @@
+{
+    "Cookware": ["Pot (Large)", "Pot (Small)", "Pot (Medium)", "Pan", "Skillet", "Dutch Oven", "Whisk"],
+    "Primary_ingredients": 
+    {
+        "cb": "chicken breast",
+        "ct": "chicken thigh",
+        "r": "rice"
+    },
+    // Maybe hashing on the first 2 letters, or first and last would save some manual entry time
+    "Secondary_ingredients": {
+        "s": "salt",
+        "p": "pepper"
+    },
+    "restrictions": ["Vegan", "Vegetarian", "Gluten Free"]
+}
