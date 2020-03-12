@@ -1,0 +1,14 @@
+Done
+1. Created GitHub repo
+
+To Do
+1.	Make a meal plan (5 days) from 3 key ingredients
+	a.	Choose an API
+	b.	Develop program to populate database from API according to recipe format
+
+
+Problems
+1.	Combination/meal plan algorithm
+	a.	Weight ingredients for how bad they are as leftovers
+	b.	How to map various ingredient quantities to uniform units (e.g. cups to grams)
+    
