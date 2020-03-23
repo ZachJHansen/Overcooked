@@ -8,7 +8,7 @@ if __name__=="__main__":
             recipe_records = json.loads(jsmin(recipe_file.read()))
             for recipe in recipe_records:
                 name = recipe["name"]
-                primaries = recipe["primary_ingredients"]
-                secondaries = recipe["secondary_ingredients"]
-                print(name)
-                print(primaries)
+                ingredients = tuple((recipe["primary_ingredients"], recipe["secondary_ingredients"]))
+                quantities = tuple((recipe["primary_quanitites"], recipe["secondary_quantities"]))
+                r = Recipe(name, ingredients, quantities)
+                r.update_leftover_score(ingredients, weights, units)
