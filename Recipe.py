@@ -4,10 +4,12 @@ from bitarray import bitarray                                       # pip instal
 COOKWARE_LENGTH = 100
 
 class Recipe:
-    def __init__(self, name, ingredients, **kwargs):                # Not all recipes will have information such as complexity and calorie count
+    def __init__(self, name, ingredients, quantities, **kwargs):    # Not all recipes will have information such as complexity and calorie count
         self.name = name                                            # Hence, None initialization or empty arrays
-        self.primary_ingredients = ingredients[0]                   # Minimum of recipe name and ingredients (tuple of arrays) must be provided
+        self.primary_ingredients = ingredients[0]                   # Minimum of recipe name, quantities, and ingredients (tuple of arrays) must be provided
         self.secondary_ingredients = ingredients[1]
+        self.primary_quantities = quantities[0]
+        self.secondary_quantities = quantities[1]
         self.allergens = kwargs.get('allergens', [])
         self.restrictions = kwargs.get('restrictions', [])
         self.complexity = kwargs.get('complexity', None)
@@ -23,7 +25,7 @@ class Recipe:
         for key, value in kwargs.items():
             setattr(self, key, value)
 
-    def update_leftover_score(self):
+    def update_leftover_score(self, ingredients, weights, units):
         print("Stub function")
 
     def update_buddies(self):
