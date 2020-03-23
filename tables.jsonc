@@ -4,7 +4,7 @@
     {
         "cb": {
             "name": "chicken breast",
-            "weight": 75,                                   // How much do we hate to waste ingredient X?
+            "weight": 75,                                   // How much do we hate to waste ingredient x?
             "units": "int"                                  // What is the smallest discrete unit this item comes in?
         },
         "ct": {
