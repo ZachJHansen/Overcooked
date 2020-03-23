@@ -2,14 +2,34 @@
     "Cookware": ["Pot (Large)", "Pot (Small)", "Pot (Medium)", "Pan", "Skillet", "Dutch Oven", "Whisk"],
     "Primary_ingredients": 
     {
-        "cb": "chicken breast",
-        "ct": "chicken thigh",
-        "r": "rice"
+        "cb": {
+            "name": "chicken breast",
+            "weight": 75,                                   // How much do we hate to waste ingredient X?
+            "units": "int"                                  // What is the smallest discrete unit this item comes in?
+        },
+        "ct": {
+            "name":"chicken thigh",
+            "weight": 70,
+            "units": "int"        
+        },
+        "r": {
+            "name": "rice",
+            "weight": 15,
+            "units": "cup"
+        }
     },
     // Maybe hashing on the first 2 letters, or first and last would save some manual entry time
     "Secondary_ingredients": {
-        "s": "salt",
-        "p": "pepper"
+        "s": {
+            "name": "salt",
+            "weight": 0,
+            "units": "gram"
+        },
+        "p": {
+            "name": "pepper",
+            "weight": 0,
+            "units": "gram"
+        }
     },
     "restrictions": ["Vegan", "Vegetarian", "Gluten Free"]
 }
