@@ -1,0 +1,17 @@
+1. Short Description
+
+
+2. Team Member Roles
+	Cole
+		1. Functionality 1
+		2. Functionality 2
+	Garrett
+		1.
+	Grant
+		1.
+	Nate
+		1.
+	Zach
+		1. Creating an algorithm to overlap recipes in a meal plan to reduce the amount of leftover food created by the meal plan.
+
+	
