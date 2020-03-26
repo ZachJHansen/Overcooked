@@ -1,34 +1,59 @@
 {
-    "Cookware": ["Pot (Large)", "Pot (Small)", "Pot (Medium)", "Pan", "Skillet", "Dutch Oven", "Whisk"],
-    "Primary_ingredients": 
+    "cookware": ["Pot (Large)", "Pot (Small)", "Pot (Medium)", "Pan", "Skillet", "Dutch Oven", "Whisk"],
+    "primary_ingredients": 
     {
         "cb": {
+            "id": "cb",
             "name": "chicken breast",
             "weight": 75,                                   // How much do we hate to waste ingredient x?
-            "units": "int"                                  // What is the smallest discrete unit this item comes in?
+            "units": "int",                                 // What types of units
+            "MDU": 2                                        // What is the smallest discrete unit this item comes in? (so this means chicken breast come in packs of 2)
         },
         "ct": {
+            "id": "ct",
             "name":"chicken thigh",
             "weight": 70,
-            "units": "int"        
+            "units": "int",
+            "MDU": 4        
         },
         "r": {
+            "id": "r",
             "name": "rice",
             "weight": 15,
-            "units": "cup"
-        }
-    },
-    // Maybe hashing on the first 2 letters, or first and last would save some manual entry time
-    "Secondary_ingredients": {
-        "s": {
-            "name": "salt",
-            "weight": 0,
-            "units": "gram"
+            "units": "oz",
+            "MDU": 4
         },
         "p": {
+            "id": "p",
+            "name": "potatoes",
+            "weight": 30,
+            "units": "int",
+            "MDU": 1
+        },
+        "f-s": {
+            "id": "f-s",
+            "name": "Salmon",
+            "weight": 100,
+            "units": "int",
+            "MDU": 2
+        }
+
+    },
+    // Maybe hashing on the first 2 letters, or first and last would save some manual entry time
+    "secondary_ingredients": {
+        "s": {
+            "id": "s",
+            "name": "salt",
+            "weight": 0,
+            "units": "gram",
+            "MDU": 100
+        },
+        "p": {
+            "id": "p",
             "name": "pepper",
             "weight": 0,
-            "units": "gram"
+            "units": "gram",
+            "MDU": 100
         }
     },
     "restrictions": ["Vegan", "Vegetarian", "Gluten Free"]
