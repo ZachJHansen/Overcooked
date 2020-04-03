@@ -1,0 +1,10 @@
+[
+  {
+    "calories": 500, 
+    "complexity": "easy", 
+    "main_ingredient": "chicken", 
+    "recipe_id": 0, 
+    "restrictions": "none", 
+    "time": 30
+  }
+]
