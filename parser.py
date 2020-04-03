@@ -1,6 +1,7 @@
 import json
 from Recipe import Recipe
 from jsmin import jsmin                                     # pip install jsmin
+import requests                                             
 
 def instantiate_recipe(record, prim_ingr_table):
     name = record["name"]
@@ -50,12 +51,13 @@ def update_new_buddies(path):
         recipe["buddies"] = r.buddies
     open("output.jsonc", "w").write(json.dumps(recipes))                  # Overwrite file with updated recipes from entire DB + new recipes
 
-def read_from_db(ingredients):
+def read_from_db(URL, PARAMS):
     # fetch all recipes from db that contain at least one of the specified ingredients
-    # return a list of dicts
-    return(["stub function"])
-
+    r = requests.get(url = URL, params = PARAMS) 
+    return(r.json())
 
 if __name__=="__main__":
-    update_lo_scores("master_recipes.jsonc")
-    update_new_buddies("master_recipes.jsonc")
+    #update_lo_scores("master_recipes.jsonc")
+    #update_new_buddies("master_recipes.jsonc")
+    old = read_from_db("http://127.0.0.1:5000/", {'main_ingredient':'chicken'})
+    print(old)
