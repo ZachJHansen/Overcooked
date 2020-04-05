@@ -2,15 +2,39 @@
 import flask
 from flask import request, jsonify
 import sqlite3
+import parser
 
 app = flask.Flask(__name__)
 app.config["DEBUG"] = True
+
+# Returns a cursor or None in case of failure
+def establish_connection(db):
+    try:
+        conn = sqlite3.connect(db)
+    except Exception as e:
+        print("Error while establishing database connection:", e)
+        return(None)
+    conn.row_factory = dict_factory
+    cur = conn.cursor()
+    return(cur)
 
 def dict_factory(cursor, row):
     d = {}
     for idx, col in enumerate(cursor.description):
         d[col[0]] = row[idx]
     return d
+
+def insertion_wrapper(cursor, table, columns, values):
+    sql = "INSERT INTO " + table + "("
+    for c in columns:
+        col = c + ", "
+        sql += col
+    sql = sql[:-2] + ") VALUES ("
+    for i in range(len(values)):
+        sql += "?, "
+    sql = sql[:-2] + ");"
+    cursor.execute(sql, values)
+    return(cur.lastrowid)
 
 # List of possible recipe constraints
 @app.route('/', methods=['GET'])
@@ -43,18 +67,71 @@ def api_filter():
 	  
     query = query[:-4] + ';'
 
-    conn = sqlite3.connect('Recipes.db')
-    conn.row_factory = dict_factory
-    cur = conn.cursor()
+    #conn = sqlite3.connect('Recipes.db')
+    #conn.row_factory = dict_factory
+    #cur = conn.cursor()
+    cur = establish_connection('Recipes.db')
 
-    results = cur.execute(query, to_filter).fetchall()
+    try:
+        results = cur.execute(query, to_filter).fetchall()
+    except Exception as e:
+        print("Error while retrieving results from DB")
+        return None
 
-    return jsonify(results)
-
+    # Generate meal plan from results
+    mp = generate_meal_plan(jsonify(results))
+    return mp
+    #return(jsonify(results))
     #print(query)
     #print(to_filter)
 	
     #return(query_parameters)
     
+@app.route('/', methods=['POST'])
+def add_recipe(recipe_json):
+    # Connect to DB
+    cur = establish_connection('Recipes.db')
+
+    # Insert recipe data into recipes table
+    columns = []
+    values = []
+    for key in recipe_json:
+        if (key != "primary_ingredients"):
+            columns.append(key)
+            values.append(recipe_json[key])
+    rowid = insertion_wrapper(cur, 'recipes', columns, values)
+
+    # Insert ingredient data into ingredients table
+    columns = []
+    values = []
+
+
+
+    # Insert ingredients into 
+    
+    primary_ingredients = recipe_json["primary_ingredients"]
+    #for ingr in primary_ingredients:
+
+
+
 
 app.run()
+
+
+# https://stackoverflow.com/questions/11542930/inserting-an-array-into-sqlite3-python
+'''
+CREATE TABLE IF NOT EXISTS ingredients ( 
+  recipe_id INTEGER NOT NULL,
+  code VARCHAR(8) NOT NULL, 
+  quantity REAL NOT NULL, 
+  units varchar(8), 
+  PRIMARY KEY(recipe_id, code),
+  FOREIGN KEY(recipe_id) 
+    REFERENCES recipes(recipe_id)
+    ON DELETE CASCADE);
+
+ALTER TABLE ingredients
+  ADD FOREIGN KEY(code)
+    REFERENCES ingr_lookup(code)
+    ON DELETE CASCADE;
+  '''
