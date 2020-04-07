@@ -1,18 +1,9 @@
 import json
-from Recipe import Recipe, ingredient_score
+from Recipe import *
 from jsmin import jsmin                                     # pip install jsmin
 import requests           
 import multiprocessing as mp 
-import random                  
-
-def instantiate_recipe(record, prim_ingr_table):
-    name = record["name"]
-    ingredients = tuple((record["primary_ingredients"], record["secondary_ingredients"]))
-    table_data = []
-    for pi in ingredients[0].keys():
-        table_data.append(prim_ingr_table[pi])
-    r = Recipe(name, ingredients)
-    return(r, table_data)
+import random               
 
 # Newly added recipes stored in a JSON file at PATH must have the leftover scores added
 # File at PATH will be overwritten with updated values
@@ -32,7 +23,7 @@ def update_lo_scores(path):
 # When new recipes are added, the entire database's buddies must be updated
 # (A new best bud could be found in the new recipes)        
 # But maybe to reduce complexity we are only interested in overlapping recipes that share > 0 primary ingredients
-def update_new_buddies(path):
+def update_new_buddies(path, K):
     ingredients = set()                                           # Union of all primary ingredients required by new recipes
     with open("tables.jsonc") as tables:
         with open(path) as recipe_file:
@@ -47,7 +38,7 @@ def update_new_buddies(path):
     for recipe in recipes:
         r, table_data = instantiate_recipe(recipe, prim_ingr_table)
         n_minus_1 = [r for r in recipes if r != recipe]
-        r.update_buddies(n_minus_1, prim_ingr_table)
+        r.update_buddies(n_minus_1, prim_ingr_table, K)
         print("Buddies -", recipe["rID"])
         print(r.buddies)
         recipe["buddy_recipes"] = r.buddies
@@ -228,10 +219,22 @@ def minimize_tuple_array(array, X, N):
     return(results)
 
 
-# Make a meal plan from N recipes
+# Make a meal plan with N recipes
 def generate_meal_plan(results, N):
-    rids = select_meal_plan_recipes(results, N)
-    print(rids)
+    try:
+        if (len(results) < N):
+            print("Recipe finder returned fewer results than requested number of recipes in meal plan")
+            raise ValueError 
+        with open("tables.jsonc") as tables:
+            prim_ingr_table = json.loads(jsmin(tables.read()))["primary_ingredients"]
+            rids = select_meal_plan_recipes(results, N)
+            print(rids)
+            recipes = [r for r in results if r["rID"] in rids]
+            mp = MealPlan(recipes, prim_ingr_table)
+        return(mp)
+    except:
+        return None
+
 
 # Generate a random meal plan, calculate total leftover score
 # Needs testing
@@ -259,7 +262,7 @@ def random_meal_plan(results, prim_ingr_table, N):
 
 if __name__=="__main__":
     #update_lo_scores("master_recipes.jsonc")
-    #update_new_buddies("master_recipes.jsonc")
+    #update_new_buddies("master_recipes.jsonc", 3)
     #old = read_from_db("http://127.0.0.1:5000/", {'main_ingredient':'chicken'})
     #print(old)
     #insertion_wrapper(1, "ingredients", ["code", "quantity"], ["ch", 10])
@@ -268,8 +271,7 @@ if __name__=="__main__":
         with open("output.jsonc") as recipe_file:
             new_recipes = json.loads(jsmin(recipe_file.read()))
             prim_ingr_table = json.loads(jsmin(tables.read()))["primary_ingredients"]
-            generate_meal_plan(new_recipes, 3)
-            random_meal_plan(new_recipes, prim_ingr_table, 3)
-
- 
-    
+            mp = generate_meal_plan(new_recipes, 3)
+            #random_meal_plan(new_recipes, prim_ingr_table, 3)
+            mp.print_recipes()
+            mp.print_grocery()
