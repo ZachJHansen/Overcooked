@@ -2,7 +2,9 @@
 import flask
 from flask import request, jsonify
 import sqlite3
-import parser
+from parser import generate_meal_plan
+import json
+import sys
 
 app = flask.Flask(__name__)
 app.config["DEBUG"] = True
@@ -71,16 +73,33 @@ def api_filter():
     #conn.row_factory = dict_factory
     #cur = conn.cursor()
     cur = establish_connection('Recipes.db')
+#    results = cur.execute(query, to_filter).fetchall()
 
     try:
         results = cur.execute(query, to_filter).fetchall()
+        #print("Length: ", len(results), file=sys.stderr)
+        #for row in results:
+        #  print(row, file=sys.stderr)
+        mp = generate_meal_plan(results, 5)
+        mp.print_recipes(sys.stderr)
+        mp.print_grocery(sys.stderr)
+        return(mp.recipes)
     except Exception as e:
-        print("Error while retrieving results from DB")
+        print("Error while retrieving results from DB", file=sys.stderr)
         return None
 
     # Generate meal plan from results
-    mp = generate_meal_plan(jsonify(results))
-    return mp
+    #data = jsonify(results)
+    #print("Data", file=sys.stderr)
+    #for key in data:
+    #  print(data[key], file=sys.stderr)
+    #mp = generate_meal_plan(jsonify(results), 5)
+    #mp.print_recipes()
+    #mp.print_grocery()
+    #return(jsonify(results))
+    #data = results.get_json()
+    #type(data))
+    #print(data)
     #return(jsonify(results))
     #print(query)
     #print(to_filter)
