@@ -105,12 +105,4 @@ public class fetchData extends AsyncTask<Void,Void,String> {
         void processFinish(String output);
     }
 
-
-    public static String getIngredient () {
-        return ingredient;
-    }
-
-    public static void setIngredient(String ingredient) {
-        fetchData.ingredient = ingredient;
-    }
 }
