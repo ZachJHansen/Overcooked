@@ -32,7 +32,7 @@ def update_new_buddies(path, K):
     for recipe in new_recipes:
         for ingr in recipe["primary_ingredients"].keys():
             ingredients.add(ingr)
-    #old_recipes = read_from_db(HOST, ingredients)                         # Only compare recipes that share primary ingredients with new recipes
+    #old_recipes = read_from_db("", ingredients)                         # Only compare recipes that share primary ingredients with new recipes
     #recipes = old_recipes + new_recipes                         # Shallow copies, no memory issue, all new + fetched recipes will be updated
     recipes = new_recipes
     for recipe in recipes:
@@ -260,9 +260,10 @@ def random_meal_plan(results, prim_ingr_table, N):
     print([r["rID"] for r in recipes])
     print("Total score for random meal plan:", score)
 
+
 if __name__=="__main__":
-    #update_lo_scores("master_recipes.jsonc")
-    #update_new_buddies("master_recipes.jsonc", 3)
+    update_lo_scores("output.jsonc")
+    update_new_buddies("output.jsonc", 3)
     #old = read_from_db("http://127.0.0.1:5000/", {'main_ingredient':'chicken'})
     #print(old)
     #insertion_wrapper(1, "ingredients", ["code", "quantity"], ["ch", 10])
