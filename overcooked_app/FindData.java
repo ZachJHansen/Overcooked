@@ -56,8 +56,11 @@ public class FindData extends AppCompatActivity implements fetchData.AsyncRespon
         final Context context = this;
         recipeNo = fetchData.recNo;
         Button[] myButton = new Button[recipeNo];
+        int size = myButton.length;
         LinearLayout layout = (LinearLayout) findViewById(R.id.space_layout);
-
+        for (int i = size-1; i >= recipeNo; i--) {
+            myButton[i].setVisibility(View.GONE);
+        }
         for (int i = 0; i < recipeNo; i++) {
 
             myButton[i] = new Button(this);
@@ -73,6 +76,7 @@ public class FindData extends AppCompatActivity implements fetchData.AsyncRespon
                     startActivity(new Intent(FindData.this,Pop.class));
 
                 }
+
             });
 
             SharedPreferences sharedPreferences = getSharedPreferences("overcooked_preferences",MODE_PRIVATE);

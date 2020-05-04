@@ -7,7 +7,7 @@ import android.util.DisplayMetrics;
 import android.widget.TextView;
 
 public class Pop extends Activity {
-
+    public static TextView popTitle;
     public static TextView recipe;
     String popMess;
 
@@ -16,18 +16,21 @@ public class Pop extends Activity {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.popwindow);
-
+        popTitle = (TextView) findViewById(R.id.title);
         recipe = (TextView) findViewById(R.id.popup);
+
         DisplayMetrics dm = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(dm);
         SharedPreferences sharedPreferences = getSharedPreferences("overcooked_preferences",MODE_PRIVATE);
 
-        popMess = fetchData.title[FindData.counter]+fetchData.ingredients[FindData.counter]+fetchData.instructions[FindData.counter];
+
+        popMess = fetchData.ingredients[FindData.counter]+"\n\n"+fetchData.instructions[FindData.counter];
+        popTitle.setText(fetchData.title[FindData.counter]);
         recipe.setText(popMess);
         int width = dm.widthPixels;
         int height = dm.heightPixels;
 
-        getWindow().setLayout((int)(width*0.8),(int)(height*0.6));
+        getWindow().setLayout((int)(width*0.8),(int)(height*0.8));
 
 
     }
