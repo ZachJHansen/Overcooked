@@ -28,30 +28,31 @@ def dict_factory(cursor, row):
 def update_new_buddies(path, K):
     connection = establish_connection("sqliteRecipeList.db")
     cursor = connection.cursor()
-    
-    ingredients = set()                                           # Union of all primary ingredients required by new recipes
+    if (connection is not None):
+        records = read_from_db(connection, "smallSet")
+        table = read_from_db(connection, "IngredientsList")
+        recipes = []
+        for record in records:
+            r, table_data = instantiate_recipe(record, table)
+            recipes.append(r)
+        if (path is not None):
+            recipes += instantiate_from_json(path)                         # Shallow copies, no memory issue, all new + fetched recipes will be updated
+        for i, recipe in enumerate(recipes):
+            n_minus_1 = [r for r in recipes if r != recipe]
+            recipe.update_buddies(n_minus_1, table, K)
+            buddy_string = recipe.buddies
+            #buds = recipe.buddies
+            #for key in buds.keys():
+            #    buddy_string += (str(key) + str(buds[key]) + " ")
+            #buddy_string += "'"
+            sql_update_query = "UPDATE smallSet set buddyRecipes = ? WHERE title = '" + recipe.name + "'"
+            cursor.execute(sql_update_query, (buddy_string,))
+            connection.commit()
 
-    with open("tables.jsonc") as tables:
-        with open(path) as recipe_file:
-            new_recipes = json.loads(jsmin(recipe_file.read()))
-            prim_ingr_table = json.loads(jsmin(tables.read()))["primary_ingredients"]
-    for recipe in new_recipes:
-        for ingr in recipe["primary_ingredients"].keys():
-            ingredients.add(ingr)
-    #old_recipes = read_from_db("", ingredients)                         # Only compare recipes that share primary ingredients with new recipes
-    #recipes = old_recipes + new_recipes                         # Shallow copies, no memory issue, all new + fetched recipes will be updated
-    recipes = new_recipes
-    for recipe in recipes:
-        r, table_data = instantiate_recipe(recipe, prim_ingr_table)
-        n_minus_1 = [r for r in recipes if r != recipe]
-        r.update_buddies(n_minus_1, prim_ingr_table, K)
-        recipe["buddy_recipes"] = r.buddies
-   #     for key in (r.buddies).keys():
-  
-  #          sql_update_query = "UPDATE LowIngredientsRecipes set " key + " = " + (r.buddies)[key] + "' WHERE title = '" + r["name"] + "'"
-            #cursor.execute(sql_update_query);
-            #cursor.execute('COMMIT')
-    open("output.jsonc", "w").write(json.dumps(recipes))                  # Overwrite file with updated recipes from entire DB + new recipes
+
+def instantiate_from_json(path):
+    print("Stub function, create recipe class instance from JSON file")
+    return None
 
 # fetch all records from specified table
 def read_from_db(connection, table):
@@ -72,6 +73,7 @@ def update_lo_scores():
             cursor = connection.cursor()
             sql_update_query = "UPDATE smallSet set LeftoverScore ='" + str(r.leftover_score) + "' WHERE title = '" + r.name + "'"
             cursor.execute(sql_update_query)
+            connection.commit()
     else:
         sys.exit("Failed to establish connection with database.")
 
@@ -276,7 +278,8 @@ def random_meal_plan(results, prim_ingr_table, N):
 
 
 if __name__=="__main__":
-    update_lo_scores()    
+    update_lo_scores()  
+    update_new_buddies(None, 3)  
     #update_lo_scores("output.jsonc")
     #update_new_buddies("output.jsonc", 3)
     #old = read_from_db("http://127.0.0.1:5000/", {'main_ingredient':'chicken'})

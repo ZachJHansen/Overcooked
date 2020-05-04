@@ -31,36 +31,33 @@ class Recipe:
         for ingr_table in table_data:
             QR_idx = self.ingredients.index(ingr_table["Ingredient"])
             QR = self.quantities[QR_idx]
-            print("QR:", QR)
             leftovers.append(ingredient_score(ingr_table, QR))
         self.leftover_score = sum(leftovers)
 
     # Parameters: All recipes except recipe in question, lookup table for primary ingredients
     # Generate the leftover score of every recipe when combined with the recipe in question
     # Updates an array of the K recipes that pair best with given recipe (lowest leftover score), tuples (id, leftover score)
-    def update_buddies(self, n_minus_1, prim_ingr_table, K):
+    def update_buddies(self, n_minus_1, table, K):
         buddies = [(0, float("inf")) for i in range(K)]
         for candidate in n_minus_1:
             table_data = []
-            combined_ingredients = set([*(self.ingredients)] + [*(candidate["ingredients"])])       # unpack keys into list literals and combine
+            combined_ingredients = set([*(self.ingredients)] + [*(candidate.ingredients)])       # unpack keys into list literals and combine
             for pi in combined_ingredients:
-                table_data.append(table_lookup(prim_ingr_table, pi))
+                table_data.append(table_lookup(table, pi))
             leftovers = []
             for ingr_table in table_data:
-                print(ingr_table)
-                '''
                 _id = ingr_table['Ingredient']
                 if _id in self.ingredients:
-                    QR_1 = self.ingredients[_id]
+                    QR_1 = self.quantities[self.ingredients.index(_id)]
                 else:
                     QR_1 = 0
-                if _id in candidate["ingredients"]:
-                    QR_2 = candidate["ingredients"][_id]
+                if _id in candidate.ingredients:
+                    QR_2 = candidate.quantities[candidate.ingredients.index(_id)]
                 else:
                     QR_2 = 0
                 leftovers.append(ingredient_score(ingr_table, QR_1+QR_2))
             score = sum(leftovers)
-            curr_max_index = buddies[0][0]
+            curr_max_index = 0
             curr_max_score = buddies[0][1]
             for i, bud in enumerate(buddies):
                 bID, bScore = bud[0], bud[1]
@@ -69,10 +66,10 @@ class Recipe:
                     curr_max_index = i
             if curr_max_score > score:
                 del buddies[curr_max_index]
-                buddies.append(tuple((candidate["rID"], score)))
+                buddies.append(tuple((candidate.name, score)))
         for b in buddies:
             self.buddies[b[0]] = b[1]
-            '''
+
 
 class MealPlan:
     def __init__(self, recipes_array, prim_ingr_table):
