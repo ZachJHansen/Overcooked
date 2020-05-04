@@ -63,7 +63,8 @@ def api_filter():
 
 
     try:
-        results = cur.execute("SELECT title, ingredients, instructions FROM smallSet WHERE title LIKE ?", to_filter).fetchall()        #print("Length: ", len(results), file=sys.stderr)
+        results = cur.execute("SELECT title, ingredients, instructions FROM smallSet WHERE title LIKE ?", to_filter).fetchall()        
+	#print("Length: ", len(results), file=sys.stderr)
         #for row in results:
         #  print(row, file=sys.stderr)
         mp = generate_meal_plan(results, 5)
