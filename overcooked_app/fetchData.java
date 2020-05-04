@@ -17,6 +17,7 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
 
 public class fetchData extends AsyncTask<Void,Void,String> {
@@ -25,10 +26,12 @@ public class fetchData extends AsyncTask<Void,Void,String> {
     public static int recNo = 0;
     private String dataParsed  = "";
     String singleParsed = "";
-    static String[] both = new String[20];
+    static String[] title = new String[20];
+    static String[] ingredients = new String[20];
+    static String[] instructions = new String[20];
     public static String ingredient;
 
-    List<String> recipes;
+    public static ArrayList<String> recipes = new ArrayList<>();
 
 //    @Override
 //    protected void onPreExecute() {
@@ -41,7 +44,7 @@ public class fetchData extends AsyncTask<Void,Void,String> {
     }
 
     @Override
-    protected String doInBackground(Void... String) {
+    protected String doInBackground(Void... recipes) {
         try {
             String edit = FindData.search.getText().toString();
             String main_ingredient = "main_ingredient="+edit;
@@ -61,15 +64,10 @@ public class fetchData extends AsyncTask<Void,Void,String> {
             Log.i("JSONArray","" + JA.length());
             for (int i = 0;i<JA.length(); i++){
                 JSONObject JO = (JSONObject) JA.get(i);
-                singleParsed = "Title: " + JO.get("title") + "\n" +
-                        "Calories: " + JO.get("calories") + "\n" +
-                                "Main_ingredient: " + JO.get("main_ingredient") + "\n" +
-                                "complexity: " + JO.get("complexity") + "\n" +
-                                "recipe_id: " + JO.get("recipe_id") + "\n" +
-                                "Time: " + JO.get("time") + "\n" +
-                                "Restrictions: " + JO.get("restrictions") + "\n";
-                dataParsed += singleParsed;
-                both[i] = (String) JO.get("title");
+
+                title[i] = (String) JO.get("title");
+                ingredients[i] = (String) JO.get("ingredients");
+                instructions[i] = (String) JO.get("instructions");
                 recNo++;
 
             }
