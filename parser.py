@@ -3,27 +3,36 @@ from Recipe import *
 from jsmin import jsmin                                     # pip install jsmin
 import requests           
 import multiprocessing as mp 
-import random               
+import random    
+import sqlite3           
+
+# Returns a connection or None in case of failure
+def establish_connection(db):
+    try:
+        conn = sqlite3.connect(db)
+    except Exception as e:
+        print("Error while establishing database connection:", e)
+        return(None)
+    conn.row_factory = dict_factory
+    return(conn)
+
+def dict_factory(cursor, row):
+    d = {}
+    for idx, col in enumerate(cursor.description):
+        d[col[0]] = row[idx]
+    return d
 
 # Newly added recipes stored in a JSON file at PATH must have the leftover scores added
 # File at PATH will be overwritten with updated values
 def update_lo_scores(path):
-    with open("tables.jsonc") as tables:
-        with open(path) as recipe_file:
-            recipe_records = json.loads(jsmin(recipe_file.read()))
-            prim_ingr_table = json.loads(jsmin(tables.read()))["primary_ingredients"]
-    for recipe in recipe_records:
-        if (recipe["leftover_score"] is None):
-            r, table_data = instantiate_recipe(recipe, prim_ingr_table)
-            r.update_leftover_score(table_data)
-            recipe["leftover_score"] = r.leftover_score
-            print("Leftover score", r.leftover_score)
-    open(path, "w").write(json.dumps(recipe_records))
+    x = 5
 
 # When new recipes are added, the entire database's buddies must be updated
 # (A new best bud could be found in the new recipes)        
 # But maybe to reduce complexity we are only interested in overlapping recipes that share > 0 primary ingredients
 def update_new_buddies(path, K):
+    connection = establish_connection("sqliteRecipeList.db")
+    cursor = connection.cursor()
     ingredients = set()                                           # Union of all primary ingredients required by new recipes
     with open("tables.jsonc") as tables:
         with open(path) as recipe_file:
@@ -39,28 +48,30 @@ def update_new_buddies(path, K):
         r, table_data = instantiate_recipe(recipe, prim_ingr_table)
         n_minus_1 = [r for r in recipes if r != recipe]
         r.update_buddies(n_minus_1, prim_ingr_table, K)
-        print("Buddies -", recipe["rID"])
-        print(r.buddies)
         recipe["buddy_recipes"] = r.buddies
+   #     for key in (r.buddies).keys():
+  
+  #          sql_update_query = "UPDATE LowIngredientsRecipes set " key + " = " + (r.buddies)[key] + "' WHERE title = '" + r["name"] + "'"
+            #cursor.execute(sql_update_query);
+            #cursor.execute('COMMIT')
     open("output.jsonc", "w").write(json.dumps(recipes))                  # Overwrite file with updated recipes from entire DB + new recipes
 
-def read_from_db(URL, PARAMS):
-    # fetch all recipes from db that contain at least one of the specified ingredients
-    r = requests.get(url = URL, params = PARAMS) 
-    sc = r.status_code
-    if (sc == 200):                              # OK
-        docs = r.json()
-        return(docs)
-    elif (sc >= 300 and sc < 400):
-        print("Redirection code %s.".format(sc))
-    elif (sc >= 400 and sc < 500):
-        print("Client Error %s".format(sc))
-    elif (sc >= 500):
-        print("Server Error %s.".format(sc))
-    else:
-        print("Unknown error %s".format(sc))
-    return None
+# fetch all records from specified table
+def read_from_db(connection, table):
+    cur = connection.cursor()
+    records = cur.execute("SELECT * FROM " + table + ";").fetchall()
+    return (records)
 
+# read all recipes from the database as well as needed ingredient table data
+def update_scores():
+    connection = establish_connection("sqliteRecipeList.db")
+    if (connection is not None):
+        records = read_from_db(connection, "smallSet")
+        table = read_from_db(connection, "IngredientsList")
+        for record in records:
+            r, table_data = instantiate_recipe(records[0], table)
+            r.update_leftover_score(table_data)
+            print(r.leftover_score)
 # Find the N smallest members of the array
 # Returns an array of ints representing the reciped IDs of the best candidates:
 # Best candidates are recipes who possess a buddy recipe that has one of the N smallest leftover scores
@@ -262,17 +273,18 @@ def random_meal_plan(results, prim_ingr_table, N):
 
 
 if __name__=="__main__":
-    update_lo_scores("output.jsonc")
-    update_new_buddies("output.jsonc", 3)
+    update_scores()    
+    #update_lo_scores("output.jsonc")
+    #update_new_buddies("output.jsonc", 3)
     #old = read_from_db("http://127.0.0.1:5000/", {'main_ingredient':'chicken'})
     #print(old)
     #insertion_wrapper(1, "ingredients", ["code", "quantity"], ["ch", 10])
 #c.execute("INSERT INTO nametable " + snames + ";")
-    with open("tables.jsonc") as tables:
-        with open("output.jsonc") as recipe_file:
-            new_recipes = json.loads(jsmin(recipe_file.read()))
-            prim_ingr_table = json.loads(jsmin(tables.read()))["primary_ingredients"]
-            mp = generate_meal_plan(new_recipes, 3)
+    #with open("tables.jsonc") as tables:
+    #    with open("output.jsonc") as recipe_file:
+    #        new_recipes = json.loads(jsmin(recipe_file.read()))
+    #        prim_ingr_table = json.loads(jsmin(tables.read()))["primary_ingredients"]
+    #        mp = generate_meal_plan(new_recipes, 3)
             #random_meal_plan(new_recipes, prim_ingr_table, 3)
-            mp.print_recipes()
-            mp.print_grocery()
+    #        mp.print_recipes()
+    #        mp.print_grocery()
