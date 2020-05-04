@@ -5,10 +5,10 @@ import sys
 COOKWARE_LENGTH = 100
 
 class Recipe:
-    def __init__(self, name, ingredients, **kwargs):                # Not all recipes will have information such as complexity and calorie count
+    def __init__(self, name, ingredients, quantities, **kwargs):                # Not all recipes will have information such as complexity and calorie count
         self.name = name                                            # Hence, None initialization or empty arrays
-        self.primary_ingredients = ingredients[0]                   # Minimum of recipe name, quantities, and ingredients must be provided
-        self.secondary_ingredients = ingredients[1]
+        self.ingredients = ingredients                              # Minimum of recipe name, quantities, and ingredients must be provided
+        self.quantities = [float(q) for q in quantities.split(",")]
         self.allergens = kwargs.get('allergens', [])
         self.restrictions = kwargs.get('restrictions', [])
         self.complexity = kwargs.get('complexity', None)
@@ -29,7 +29,9 @@ class Recipe:
     def update_leftover_score(self, table_data):
         leftovers = []
         for ingr_table in table_data:
-            QR = self.primary_ingredients[ingr_table['id']]
+            QR_idx = self.ingredients.index(ingr_table["Ingredient"])
+            QR = self.quantities[QR_idx]
+            print("QR:", QR)
             leftovers.append(ingredient_score(ingr_table, QR))
         self.leftover_score = sum(leftovers)
 
@@ -38,21 +40,22 @@ class Recipe:
     # Updates an array of the K recipes that pair best with given recipe (lowest leftover score), tuples (id, leftover score)
     def update_buddies(self, n_minus_1, prim_ingr_table, K):
         buddies = [(0, float("inf")) for i in range(K)]
-        #buddies = [(0,float("inf")), (0,float("inf")), (0,float("inf"))]
         for candidate in n_minus_1:
             table_data = []
-            combined_ingredients = set([*(self.primary_ingredients)] + [*(candidate["primary_ingredients"])])       # unpack keys into list literals and combine
+            combined_ingredients = set([*(self.ingredients)] + [*(candidate["ingredients"])])       # unpack keys into list literals and combine
             for pi in combined_ingredients:
-                table_data.append(prim_ingr_table[pi])
+                table_data.append(table_lookup(prim_ingr_table, pi))
             leftovers = []
             for ingr_table in table_data:
-                _id = ingr_table['id']
-                if _id in self.primary_ingredients:
-                    QR_1 = self.primary_ingredients[_id]
+                print(ingr_table)
+                '''
+                _id = ingr_table['Ingredient']
+                if _id in self.ingredients:
+                    QR_1 = self.ingredients[_id]
                 else:
                     QR_1 = 0
-                if _id in candidate["primary_ingredients"]:
-                    QR_2 = candidate["primary_ingredients"][_id]
+                if _id in candidate["ingredients"]:
+                    QR_2 = candidate["ingredients"][_id]
                 else:
                     QR_2 = 0
                 leftovers.append(ingredient_score(ingr_table, QR_1+QR_2))
@@ -69,6 +72,7 @@ class Recipe:
                 buddies.append(tuple((candidate["rID"], score)))
         for b in buddies:
             self.buddies[b[0]] = b[1]
+            '''
 
 class MealPlan:
     def __init__(self, recipes_array, prim_ingr_table):
@@ -81,7 +85,7 @@ class MealPlan:
             r, table_data = instantiate_recipe(recipe, prim_ingr_table)
             self.recipes.append(r)
             self.tabular += table_data
-            for pi in r.primary_ingredients:
+            for pi in r.ingredients:
                 if not pi in self.ingr_set:
                     self.ingr_set.add(pi)
             for si in r.secondary_ingredients:
@@ -91,8 +95,8 @@ class MealPlan:
             self.grocery_list[ingr] = 0
         for recipe in self.recipes:
             for i in self.ingr_set:
-                if i in recipe.primary_ingredients:
-                    self.grocery_list[i] += recipe.primary_ingredients[i]
+                if i in recipe.ingredients:
+                    self.grocery_list[i] += recipe.ingredients[i]
                 if i in recipe.secondary_ingredients:
                     self.grocery_list[i] += recipe.secondary_ingredients[i]
 
@@ -114,18 +118,26 @@ def ingredient_score(ingr_table, QR):
     MDU = ingr_table['MDU']
     while (S * MDU < QR):     
         S += 1
-    leftover = (S * MDU - QR) * ingr_table['weight']
+    leftover = (S * MDU - QR) * ingr_table['Weight']
     return(leftover)
 
-def instantiate_recipe(record, prim_ingr_table):
-    name = record["name"]
-    ingredients = tuple((record["primary_ingredients"], record["secondary_ingredients"]))
+def instantiate_recipe(record, ingr_table):
+    name = record["title"]
+    ingredients = []
+    for i in record["ingredientsSimplified"].split(","):
+        ingredients.append(i.strip())
     table_data = []
-    for pi in ingredients[0].keys():
-        table_data.append(prim_ingr_table[pi])
-    r = Recipe(name, ingredients)
+    for i in ingredients:
+        table_data.append(table_lookup(ingr_table, i))
+    r = Recipe(name, ingredients, record["ingredientsUnits"])
     return(r, table_data)
-          
+
+def table_lookup(ingr_table, ingredient):
+    for i in ingr_table:
+        if (ingredient == i["Ingredient"]):
+            return i
+    sys.exit("Requested ingredient " + ingredient + " does not exist in ingredient table!")
+
 if __name__=="__main__":
     if False:
         ingredients = tuple((["rice", "beans"], ["red pepper"]))
