@@ -6,14 +6,57 @@
     android:layout_height="match_parent"
     tools:context=".ShoppingList">
 
+    <LinearLayout
+        android:id="@+id/linearLayout"
+        android:layout_width="131dp"
+        android:layout_height="68dp"
+        android:layout_marginTop="220dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginRight="16dp"
+        android:orientation="horizontal"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <Button
+            android:id="@+id/decrease"
+            android:layout_width="37dp"
+            android:layout_height="35dp"
+            android:onClick="decreaseInteger"
+            android:text="-"
+            tools:layout_editor_absoluteX="287dp"
+            tools:layout_editor_absoluteY="289dp" />
+
+        <TextView
+            android:id="@+id/integer_number"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+
+
+            android:layout_marginBottom="16dp"
+            android:text="0"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+
+        <Button
+            android:id="@+id/increase"
+            android:layout_width="37dp"
+            android:layout_height="35dp"
+            android:onClick="increaseInteger"
+            android:text="+"
+            tools:layout_editor_absoluteX="349dp"
+            tools:layout_editor_absoluteY="288dp" />
+
+
+    </LinearLayout>
+
     <TextView
         android:id="@+id/ingredient"
-        android:layout_width="194dp"
-        android:layout_height="21dp"
-        android:layout_marginStart="98dp"
-        android:layout_marginLeft="98dp"
-        android:layout_marginTop="118dp"
+        android:layout_width="227dp"
+        android:layout_height="32dp"
+
+        android:layout_marginTop="232dp"
         android:text="@string/app_name"
+        app:layout_constraintEnd_toStartOf="@+id/linearLayout"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
